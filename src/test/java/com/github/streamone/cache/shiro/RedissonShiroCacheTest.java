@@ -37,16 +37,40 @@ public class RedissonShiroCacheTest {
     }
 
     @Test
-    public void testStringCache() {
+    public void testStringKeys() {
         Cache<String, String> cache = this.cacheManager.getCache("testStringCache");
         testCaches.add(cache);
         Assert.assertNotNull(cache);
+
         cache.put("foo", "bar");
         cache.put("any", "one");
         Assert.assertEquals(2, cache.size());
+
         String val = cache.get("foo");
         Assert.assertEquals("bar", val);
+
         cache.remove("any");
+        Assert.assertEquals(1, cache.size());
+    }
+
+    @Test
+    public void testObjectKeys() {
+        Cache<KeyEntity, ValueEntity> cache = this.cacheManager.getCache("testObjCache");
+        testCaches.add(cache);
+        Assert.assertNotNull(cache);
+
+        KeyEntity fooKey = new KeyEntity("foo_key");
+        ValueEntity fooVal = new ValueEntity("foo_val");
+        KeyEntity barKey = new KeyEntity("bar_key");
+        ValueEntity barVal = new ValueEntity("var_val");
+        cache.put(fooKey, fooVal);
+        cache.put(barKey, barVal);
+        Assert.assertEquals(2, cache.size());
+
+        ValueEntity val = cache.get(fooKey);
+        Assert.assertEquals(fooVal, val);
+
+        cache.remove(barKey);
         Assert.assertEquals(1, cache.size());
     }
 
