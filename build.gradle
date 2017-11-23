@@ -1,13 +1,14 @@
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'java'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.github.streamone'
-version = '1.0.0.beta-1'
+version = '1.0.0.SNAPSHOT'
 
 repositories {
 	maven {
@@ -62,17 +63,15 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
-    archives jar
     archives javadocJar
     archives sourceJar
 }
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			from components.java
-			artifact sourceJar {
-				classifier "sources"
-			}
-		}
-	}
+
+signing {
+    sign configurations.archives
 }
+
+tasks.withType(Sign) {
+    onlyIf { !version.endsWith("SNAPSHOT") && project.hasProperty("publish_sign") }
+}
+
