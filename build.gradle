@@ -11,9 +11,7 @@ group = 'com.github.streamone'
 version = '1.0.0.SNAPSHOT'
 
 repositories {
-	maven {
-		url "http://maven.aliyun.com/nexus/content/groups/public/"
-	}
+    mavenCentral()
 }
 
 configurations {
@@ -53,12 +51,12 @@ javadoc {
 }
 
 task sourceJar(type: Jar) {
-    from sourceSets.main.allJava
+    from sourceSets.main.allSource
     classifier "sources"
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    from javadoc.destinationDir
+    from javadoc
     classifier "javadoc"
 }
 

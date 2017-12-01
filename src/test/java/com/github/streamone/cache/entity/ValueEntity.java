@@ -1,4 +1,4 @@
-package com.github.streamone.cache.shiro;
+package com.github.streamone.cache.entity;
 
 /**
  * <p>A value entity class for cache testing.</p>

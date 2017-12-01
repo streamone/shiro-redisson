@@ -1,5 +1,7 @@
 package com.github.streamone.cache.shiro;
 
+import com.github.streamone.cache.entity.KeyEntity;
+import com.github.streamone.cache.entity.ValueEntity;
 import org.apache.shiro.cache.Cache;
 import org.junit.AfterClass;
 import org.junit.Assert;
