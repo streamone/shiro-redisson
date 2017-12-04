@@ -16,6 +16,7 @@ http://redisson.org/schema/redisson/redisson.xsd">
 
     <bean id="cacheManager" class="com.github.streamone.cache.shiro.RedissonShiroCacheManager">
         <property name="redisson" ref="redisson"/>
+        <property name="configLocation" value="classpath:/cache-config.json"/>
     </bean>
 
 </beans>

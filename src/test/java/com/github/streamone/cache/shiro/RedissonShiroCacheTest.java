@@ -76,4 +76,44 @@ public class RedissonShiroCacheTest {
         Assert.assertEquals(1, cache.size());
     }
 
+    /**
+     * <p>test cache config</p>
+     * <p>the configs in cache-config.json.</p>
+     */
+    @Test
+    public void testCacheConfig() throws InterruptedException {
+        //ttl is 3000 ms
+        Cache<String, String> ttlCache = this.cacheManager.getCache("testTTLCache");
+        testCaches.add(ttlCache);
+        ttlCache.put("foo", "bar");
+        Thread.sleep(1000);
+        Assert.assertEquals("bar", ttlCache.get("foo"));
+        Thread.sleep(2000);
+        Assert.assertNull(ttlCache.get("foo"));
+
+        //max idle time is 500 ms
+        Cache<String, String> maxIdleCache = this.cacheManager.getCache("testMaxIdleCache");
+        testCaches.add(maxIdleCache);
+        maxIdleCache.put("foo", "bar");
+        maxIdleCache.put("some", "thing");
+        Thread.sleep(200);
+        maxIdleCache.get("foo");
+        Thread.sleep(300);
+        Assert.assertEquals("bar", maxIdleCache.get("foo"));
+        Assert.assertNull(maxIdleCache.get("some"));
+
+        //max size is 5
+        Cache<String, String> maxSizeCache = this.cacheManager.getCache("testMaxSizeCache");
+        testCaches.add(maxSizeCache);
+        for (int i = 1; i <= 5; i++) {
+            String key = "key" + String.valueOf(i);
+            String val = "val" + String.valueOf(i);
+            maxSizeCache.put(key, val);
+        }
+        Assert.assertEquals(5, maxSizeCache.size());
+        maxSizeCache.put("foo", "bar");
+        Assert.assertEquals(5, maxSizeCache.size());
+        Assert.assertNull(maxSizeCache.get("key1"));
+    }
+
 }

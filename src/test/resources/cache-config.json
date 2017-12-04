@@ -1,0 +1,5 @@
+{
+  "testMaxIdleCache": { "ttl": 0, "maxIdleTime": 500, "maxSize": 0 },
+  "testMaxSizeCache": { "ttl": 0, "maxIdleTime": 0, "maxSize": 5 },
+  "testTTLCache": { "ttl": 3000, "maxIdleTime": 0, "maxSize": 0 }
+}
