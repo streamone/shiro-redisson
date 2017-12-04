@@ -20,8 +20,7 @@ configurations {
 }
 
 dependencies {
-  compile 'org.apache.commons:commons-lang3:3.3.2',
-    'org.slf4j:slf4j-api:1.7.25',
+  compile 'org.slf4j:slf4j-api:1.7.25',
     'org.springframework:spring-core:3.2.18.RELEASE',
     'org.springframework:spring-beans:3.2.18.RELEASE',
     'org.springframework:spring-context:3.2.18.RELEASE',
