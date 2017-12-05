@@ -104,7 +104,7 @@ public class RedissonShiroCacheManager implements CacheManager, ResourceLoaderAw
         if (this.codec != null) {
             return  this.redisson.getMap(name, this.codec);
         }
-        return this.redisson.getMapCache(name);
+        return this.redisson.getMap(name);
     }
 
     private <K, V> Cache<K, V> createMapCache(String name, CacheConfig config) {
