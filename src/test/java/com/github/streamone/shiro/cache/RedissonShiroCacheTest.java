@@ -1,4 +1,4 @@
-package com.github.streamone.cache.shiro;
+package com.github.streamone.shiro.cache;
 
 import com.github.streamone.cache.entity.KeyEntity;
 import com.github.streamone.cache.entity.ValueEntity;

@@ -1,4 +1,4 @@
-package com.github.streamone.cache.shiro;
+package com.github.streamone.shiro.cache;
 
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
