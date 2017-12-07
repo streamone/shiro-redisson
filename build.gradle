@@ -1,8 +1,16 @@
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'signing'
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'java'
+    id 'maven'
+    id 'maven-publish'
+    id 'signing'
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.8.2'
+}
+
+def publish_username = project.hasProperty("ossrhUsername") ? project.ossrhUsername : ''
+def publish_password = project.hasProperty("ossrhPassword") ? project.ossrhPassword : ''
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -69,6 +77,22 @@ signing {
 }
 
 tasks.withType(Sign) {
-    onlyIf { !version.endsWith("SNAPSHOT") && project.hasProperty("publish_sign") }
+    onlyIf { project.hasProperty("publish_sign") }
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+        }
+    }
+}

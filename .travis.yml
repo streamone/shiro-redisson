@@ -4,3 +4,6 @@ services:
 jdk:
   - openjdk7
   - oraclejdk8
+
+after_success:
+  - ./gradlew jacocoTestReport coveralls
