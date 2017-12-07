@@ -3,11 +3,9 @@ language: java
 services:
   - redis-server
 
-jdk:
-  - oraclejdk8
-
 matrix:
   include:
+    - jdk: oraclejdk8
     - jdk: openjdk7
       sudo: required
       before_install: # Work around missing crypto in openjdk7
