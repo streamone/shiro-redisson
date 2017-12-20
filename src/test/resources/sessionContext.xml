@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <description>RedissonShiroCache test</description>
+
+    <import resource="appContext.xml"/>
+
+    <bean id="sessionDao" class="com.github.streamone.shiro.session.RedissonSessionDao">
+        <property name="redisson" ref="redisson"/>
+    </bean>
+
+    <bean id="sessionManager" class="com.github.streamone.shiro.session.RedissonSessionManager">
+        <property name="sessionDAO" ref="sessionDao"/>
+    </bean>
+
+</beans>
