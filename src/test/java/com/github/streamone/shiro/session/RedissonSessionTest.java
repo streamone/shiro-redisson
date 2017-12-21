@@ -5,7 +5,7 @@ import org.apache.shiro.session.Session;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.DefaultSessionContext;
 import org.apache.shiro.session.mgt.DefaultSessionKey;
-import org.apache.shiro.session.mgt.SessionManager;
+import org.apache.shiro.session.mgt.SessionContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,11 +29,18 @@ import static org.junit.Assert.*;
 public class RedissonSessionTest {
 
     @Resource(name = "sessionManager")
-    private SessionManager sessionManager;
+    private RedissonSessionManager sessionManager;
 
     @Test
     public void testCreateSession() {
+        final String host = "localhost";
+        SessionContext sc = new DefaultSessionContext();
+        sc.setHost(host);
+        Session session = sessionManager.start(sc);
+        assertEquals(host, session.getHost());
+
         Session newSession = sessionManager.start(new DefaultSessionContext());
+        assertNull(newSession.getHost());
         assertNotNull(newSession);
         assertEquals(DEFAULT_GLOBAL_SESSION_TIMEOUT, newSession.getTimeout());
         assertNotNull(newSession.getStartTimestamp());
@@ -74,6 +81,13 @@ public class RedissonSessionTest {
 
         sessionManager.getSession(new DefaultSessionKey(newSession.getId())).removeAttribute("foo");
         assertNull(newSession.getAttribute("foo"));
+
+        sessionManager.getSession(new DefaultSessionKey(newSession.getId())).removeAttribute("hash");
+        assertNull(newSession.getAttribute("hash"));
+
+        keys = sessionManager.getSession(new DefaultSessionKey(
+                newSession.getId())).getAttributeKeys();
+        assertTrue(keys.size() == 0);
     }
 
     @Test(expected = InvalidSessionException.class)
@@ -83,8 +97,7 @@ public class RedissonSessionTest {
         long timeout = 50;
         newSession.setTimeout(timeout);
         TimeUnit.MILLISECONDS.sleep(timeout);
-        assertNull(sessionManager.getSession(new DefaultSessionKey(newSession.getId())));
-        newSession.touch();
+        sessionManager.getSession(new DefaultSessionKey(newSession.getId()));
     }
 
     @Test(expected = UnknownSessionException.class)
