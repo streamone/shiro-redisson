@@ -6,6 +6,6 @@
 
 ### A redis based implementation of Shiro Cache, using [redisson](https://github.com/redisson/redisson) for basic capabilities.
 
-It hasn't been prepared for production environment.
+**NOTICE**: It hasn't been prepared for production environment.
 
 
