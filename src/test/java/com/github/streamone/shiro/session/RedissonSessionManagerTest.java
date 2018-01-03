@@ -5,10 +5,17 @@ import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.*;
 import org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.annotation.Resource;
+
+import static org.apache.shiro.session.mgt.AbstractSessionManager.DEFAULT_GLOBAL_SESSION_TIMEOUT;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
@@ -16,7 +23,57 @@ import static org.mockito.Mockito.when;
  *
  * @author streamone
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("/sessionContext.xml")
 public class RedissonSessionManagerTest {
+
+    @Resource(name = "sessionManager")
+    private RedissonSessionManager sessionManager;
+
+    @Test
+    public void testCreateSession() {
+        final String host = "localhost";
+        SessionFactory noStartTimeFactory = new SessionFactory() {
+            @Override
+            public Session createSession(SessionContext initData) {
+                SimpleSession session;
+                if (initData != null) {
+                    String host = initData.getHost();
+                    if (host != null) {
+                        session = new SimpleSession(host);
+                        session.setStartTimestamp(null);
+                        return session;
+                    }
+                }
+                session = new SimpleSession();
+                session.setStartTimestamp(null);
+                return session;
+            }
+        };
+        RedissonSessionManager cloneSessionManager = spy(this.sessionManager);
+        cloneSessionManager.setSessionFactory(noStartTimeFactory);
+        SessionContext sc = new DefaultSessionContext();
+        sc.setHost(host);
+        Session session = cloneSessionManager.start(sc);
+        assertEquals(host, session.getHost());
+        assertNotNull(session.getStartTimestamp());
+
+        Session newSession = this.sessionManager.start(new DefaultSessionContext());
+        assertNull(newSession.getHost());
+        assertNotNull(newSession);
+        assertEquals(DEFAULT_GLOBAL_SESSION_TIMEOUT, newSession.getTimeout());
+        assertNotNull(newSession.getStartTimestamp());
+
+        Session retrievedSession = this.sessionManager.getSession(new DefaultSessionKey(newSession.getId()));
+        assertNotNull(retrievedSession);
+        assertEquals(newSession.getStartTimestamp(), retrievedSession.getStartTimestamp());
+    }
+
+    @Test(expected = UnknownSessionException.class)
+    public void testGetSessionByInvalidId() {
+        String invalidId = "i_am_not_a_valid_session";
+        this.sessionManager.getSession(new DefaultSessionKey(invalidId));
+    }
 
     @Test
     public void testBeanSetter() {

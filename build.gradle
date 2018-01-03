@@ -35,7 +35,7 @@ dependencies {
     'org.springframework:spring-context:3.2.18.RELEASE',
     'org.apache.shiro:shiro-core:1.3.2',
     'org.apache.shiro:shiro-web:1.3.2',
-    'org.redisson:redisson:2.10.6'
+    'org.redisson:redisson:2.10.7'
 
   testCompile 'junit:junit:4.12',
     'org.springframework:spring-test:3.2.18.RELEASE',

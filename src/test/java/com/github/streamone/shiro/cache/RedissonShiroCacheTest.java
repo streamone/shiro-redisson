@@ -8,6 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
+import static org.mockito.Mockito.spy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -50,14 +51,21 @@ public class RedissonShiroCacheTest {
         assertNotNull(cache);
 
         cache.put("foo", "bar");
-        cache.put("any", "one");
-        assertEquals(2, cache.size());
-
-        String val = cache.get("foo");
-        assertEquals("bar", val);
+        ((RedissonShiroCache) cache).fastPut("any", "one");
+        ((RedissonShiroCache) cache).putIfAbsent("other", "thing");
+        ((RedissonShiroCache) cache).putIfAbsent("any", "two");
+        ((RedissonShiroCache) cache).fastPutIfAbsent("any", "three");
+        assertEquals(3, cache.size());
+        assertEquals(3, cache.values().size());
+        assertEquals("bar", cache.get("foo"));
+        assertEquals("one", cache.get("any"));
+        assertEquals("thing", cache.get("other"));
 
         cache.remove("any");
-        assertEquals(1, cache.size());
+        assertFalse(cache.keys().contains("any"));
+
+        ((RedissonShiroCache) cache).fastRemove("foo");
+        assertFalse(cache.keys().contains("foo"));
     }
 
     @Test
@@ -71,14 +79,16 @@ public class RedissonShiroCacheTest {
         KeyEntity barKey = new KeyEntity("bar_key");
         ValueEntity barVal = new ValueEntity("var_val");
         cache.put(fooKey, fooVal);
-        cache.put(barKey, barVal);
+        ((RedissonShiroCache) cache).fastPut(barKey, barVal);
         assertEquals(2, cache.size());
 
         ValueEntity val = cache.get(fooKey);
         assertEquals(fooVal, val);
 
         cache.remove(barKey);
-        assertEquals(1, cache.size());
+        assertFalse(cache.keys().contains(barKey));
+        ((RedissonShiroCache) cache).fastRemove(fooKey);
+        assertFalse(cache.keys().contains(fooKey));
     }
 
     /**
@@ -119,6 +129,64 @@ public class RedissonShiroCacheTest {
         maxSizeCache.put("foo", "bar");
         assertEquals(5, maxSizeCache.size());
         assertNull(maxSizeCache.get("key1"));
+    }
+
+    @Test
+    public void testNullValues() {
+        RedissonShiroCacheManager cloneCacheManager = spy(this.cacheManager);
+        cloneCacheManager.setAllowNullValues(true);
+        Cache<String, String> allowNullValuesCache = cloneCacheManager.getCache("testAllowNullValuesCache");
+        testCaches.add(allowNullValuesCache);
+        // this cache is configed in cache-config.json
+        Cache<String, String> allowNullConfigedCache = cloneCacheManager.getCache("testAllowNullConfigedCache");
+        testCaches.add(allowNullConfigedCache);
+
+        cloneCacheManager.setAllowNullValues(false);
+        Cache<String, String> disallowNullValuesCache =
+                cloneCacheManager.getCache("testDisallowNullValuesCache");
+        testCaches.add(disallowNullValuesCache);
+        Cache<String, String> disallowNullConfigedCache =
+                cloneCacheManager.getCache("testDisallowNullConfigedCache");
+        testCaches.add(disallowNullConfigedCache);
+
+        doTestNull(allowNullValuesCache, disallowNullValuesCache);
+
+        doTestNull(allowNullConfigedCache, disallowNullConfigedCache);
+    }
+
+    private void doTestNull(Cache<String, String> allowCache, Cache<String, String> disallowCache) {
+        allowCache.put("foo", null);
+        assertNull(allowCache.get("foo"));
+        assertTrue(allowCache.keys().contains("foo"));
+
+        ((RedissonShiroCache) allowCache).putIfAbsent("bar", null);
+        assertNull(allowCache.get("bar"));
+        assertTrue(allowCache.keys().contains("bar"));
+
+
+        ((RedissonShiroCache) allowCache).fastPut("any", null);
+        assertNull(allowCache.get("any"));
+        assertTrue(allowCache.keys().contains("any"));
+
+        ((RedissonShiroCache) allowCache).fastPutIfAbsent("other", null);
+        assertNull(allowCache.get("other"));
+        assertTrue(allowCache.keys().contains("other"));
+
+        disallowCache.put("foo", null);
+        assertNull(disallowCache.get("foo"));
+        assertFalse(disallowCache.keys().contains("foo"));
+
+        ((RedissonShiroCache) disallowCache).putIfAbsent("bar", null);
+        assertNull(disallowCache.get("bar"));
+        assertFalse(disallowCache.keys().contains("bar"));
+
+        ((RedissonShiroCache) disallowCache).fastPut("any", null);
+        assertNull(disallowCache.get("any"));
+        assertFalse(disallowCache.keys().contains("any"));
+
+        ((RedissonShiroCache) disallowCache).fastPutIfAbsent("other", null);
+        assertNull(disallowCache.get("other"));
+        assertFalse(disallowCache.keys().contains("other"));
     }
 
 }
