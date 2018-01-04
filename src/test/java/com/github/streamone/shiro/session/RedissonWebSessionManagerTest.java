@@ -19,6 +19,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 
 import java.util.regex.Matcher;
@@ -41,7 +43,27 @@ public class RedissonWebSessionManagerTest {
     private RedissonWebSessionManager webSessionManager;
 
     @Test
+    public void testSessionIdUrlRewritingEnabled() {
+        RedissonWebSessionManager cloneSessionManager = spy(this.webSessionManager);
+        assertEquals(true, cloneSessionManager.isSessionIdUrlRewritingEnabled());
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        WebSessionKey sessionKey = new WebSessionKey(request, response);
+        cloneSessionManager.getSession(sessionKey);
+        assertTrue((Boolean) request.getAttribute(ShiroHttpServletRequest.SESSION_ID_URL_REWRITING_ENABLED));
+
+        cloneSessionManager.setSessionIdUrlRewritingEnabled(false);
+        assertFalse(cloneSessionManager.isSessionIdUrlRewritingEnabled());
+
+        cloneSessionManager.getSession(sessionKey);
+        assertFalse((Boolean) request.getAttribute(ShiroHttpServletRequest.SESSION_ID_URL_REWRITING_ENABLED));
+    }
+
+    @Test
     public void testCreateWebSession() {
+        assertFalse(this.webSessionManager.isServletContainerSessions());
+
         WebSessionContext sc = new DefaultWebSessionContext();
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -103,6 +125,10 @@ public class RedissonWebSessionManagerTest {
         assertNotNull(newSession.getId());
         assertEquals(DEFAULT_GLOBAL_SESSION_TIMEOUT, newSession.getTimeout());
         assertNotNull(newSession.getStartTimestamp());
+
+        Session retrievedSession = this.webSessionManager.getSession(new DefaultSessionKey(newSession.getId()));
+        assertNotNull(retrievedSession);
+        assertEquals(newSession.getStartTimestamp(), retrievedSession.getStartTimestamp());
     }
 
     @Test
@@ -156,6 +182,49 @@ public class RedissonWebSessionManagerTest {
         newSession.stop();
 
         Session retrievedSession = this.webSessionManager.getSession(new DefaultSessionKey(newSession.getId()));
+    }
+
+    @Test
+    public void testGetSessionByRequestURI() {
+        ServletRequest request = mock(ServletRequest.class);
+        ServletResponse response = mock(ServletResponse.class);
+        WebSessionKey notHttpSessionKey = new WebSessionKey(request, response);
+        assertNull(this.webSessionManager.getSession(notHttpSessionKey));
+
+        MockHttpServletRequest noUriHttpRequest = new MockHttpServletRequest();
+        noUriHttpRequest.setRequestURI(null);
+        MockHttpServletResponse noUriHttpResponse = new MockHttpServletResponse();
+        WebSessionKey noRequestUriSessionKey = new WebSessionKey(noUriHttpRequest, noUriHttpResponse);
+        assertNull(this.webSessionManager.getSession(noRequestUriSessionKey));
+
+        MockHttpServletRequest invalidUriSessionIdHttpRequest1 = new MockHttpServletRequest();
+        invalidUriSessionIdHttpRequest1.setRequestURI("http://server.com/any.do?foo=bar");
+        MockHttpServletResponse invalidUriSessionIdHttpResponse1 = new MockHttpServletResponse();
+        WebSessionKey invalidUriIdSessionKey1 = new WebSessionKey(invalidUriSessionIdHttpRequest1, invalidUriSessionIdHttpResponse1);
+        assertNull(this.webSessionManager.getSession(invalidUriIdSessionKey1));
+
+        MockHttpServletRequest invalidUriSessionIdHttpRequest2 = new MockHttpServletRequest();
+        invalidUriSessionIdHttpRequest2.setRequestURI("http://server.com/any.do;WRONGSESSIONIDNAME=key12345?foo=bar");
+        MockHttpServletResponse invalidUriSessionIdHttpResponse2 = new MockHttpServletResponse();
+        WebSessionKey invalidUriIdSessionKey2 = new WebSessionKey(invalidUriSessionIdHttpRequest2, invalidUriSessionIdHttpResponse2);
+        assertNull(this.webSessionManager.getSession(invalidUriIdSessionKey2));
+
+        MockHttpServletRequest validUriSessionIdHttpRequest = new MockHttpServletRequest();
+        validUriSessionIdHttpRequest.setRequestURI("http://server.com/any.do;JSESSIONID=key12345;abc?foo=bar");
+        MockHttpServletResponse validUriSessionIdHttpResponse = new MockHttpServletResponse();
+        WebSessionKey validUriIdSessionKey = new WebSessionKey(validUriSessionIdHttpRequest, validUriSessionIdHttpResponse);
+        try {
+            this.webSessionManager.getSession(validUriIdSessionKey);
+            fail("expect UnknownSessionException");
+        } catch (UnknownSessionException e) {
+            //expected exception
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+        assertEquals("key12345",
+                validUriSessionIdHttpRequest.getAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID));
+        assertEquals(ShiroHttpServletRequest.URL_SESSION_ID_SOURCE,
+                validUriSessionIdHttpRequest.getAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE));
     }
 
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * <p>RedissonShiroCacheManager test case.</p>
@@ -43,7 +44,12 @@ public class RedissonShiroCacheManagerTest {
             assertEquals(codec, cacheManager1.getCodec());
             Cache<String, String> cache1 =  cacheManager1.getCache("testManagerCache1");
             assertNotNull(cache1);
+            assertSame(cache1, cacheManager1.<String, String>getCache("testManagerCache1"));
             cache1.clear();
+            Cache<String, String> ttlCache = cacheManager1.getCache("testManagerTTLCache");
+            assertNotNull(ttlCache);
+            assertSame(ttlCache, cacheManager1.<String, String>getCache("testManagerTTLCache"));
+            ttlCache.clear();
 
             RedissonShiroCacheManager cacheManager2 = new RedissonShiroCacheManager(client, configMap);
             Cache<String, String> cache2 =  cacheManager2.getCache("testManagerCache2");

@@ -3,5 +3,6 @@
   "testMaxSizeCache": { "ttl": 0, "maxIdleTime": 0, "maxSize": 5 },
   "testTTLCache": { "ttl": 3000, "maxIdleTime": 0, "maxSize": 0 },
   "testAllowNullConfigedCache": { "ttl": 0, "maxIdleTime": 0, "maxSize": 5 },
-  "testDisallowNullConfigedCache": { "ttl": 0, "maxIdleTime": 0, "maxSize": 5 }
+  "testDisallowNullConfigedCache": { "ttl": 0, "maxIdleTime": 0, "maxSize": 5 },
+  "testManagerTTLCache": { "ttl": 3000, "maxIdleTime": 0, "maxSize": 0 }
 }

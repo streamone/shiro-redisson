@@ -135,6 +135,8 @@ public class RedissonShiroCacheTest {
     public void testNullValues() {
         RedissonShiroCacheManager cloneCacheManager = spy(this.cacheManager);
         cloneCacheManager.setAllowNullValues(true);
+        assertTrue(cloneCacheManager.isAllowNullValues());
+
         Cache<String, String> allowNullValuesCache = cloneCacheManager.getCache("testAllowNullValuesCache");
         testCaches.add(allowNullValuesCache);
         // this cache is configed in cache-config.json
@@ -142,6 +144,8 @@ public class RedissonShiroCacheTest {
         testCaches.add(allowNullConfigedCache);
 
         cloneCacheManager.setAllowNullValues(false);
+        assertFalse(cloneCacheManager.isAllowNullValues());
+
         Cache<String, String> disallowNullValuesCache =
                 cloneCacheManager.getCache("testDisallowNullValuesCache");
         testCaches.add(disallowNullValuesCache);
