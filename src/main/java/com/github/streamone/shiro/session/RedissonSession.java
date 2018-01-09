@@ -41,8 +41,6 @@ public class RedissonSession implements Session {
         this.info = info;
         this.attributes = attributes;
         this.id = id;
-
-        checkState();
     }
 
     public RedissonSession(RMap<String, Object> info, RMap<Object, Object> attributes, Session session) {
@@ -94,7 +92,7 @@ public class RedissonSession implements Session {
      * <p>check the session state</p>
      */
     protected void checkState() {
-        if (!this.info.isExists()) {
+        if (this.info.remainTimeToLive() <= 0) {
             throw new ExpiredSessionException();
         }
 

@@ -57,7 +57,8 @@ public class RedissonSessionTest {
     public void testCreateSessionByInvalidState() {
         RMap<String, Object> notExistInfoMap = mock(RMap.class);
         when(notExistInfoMap.isExists()).thenReturn(false);
-        new RedissonSession(notExistInfoMap, mock(RMap.class), UUID.randomUUID());
+        RedissonSession newSession = new RedissonSession(notExistInfoMap, mock(RMap.class), UUID.randomUUID());
+        newSession.getAttributeKeys();
     }
 
     @Test(expected = StoppedSessionException.class)
@@ -65,7 +66,8 @@ public class RedissonSessionTest {
         RMap<String, Object> noKeyInfoMap = mock(RMap.class);
         when(noKeyInfoMap.isExists()).thenReturn(true);
         when(noKeyInfoMap.containsKey(RedissonSession.INFO_STOP_KEY)).thenReturn(true);
-        new RedissonSession(noKeyInfoMap, mock(RMap.class), UUID.randomUUID());
+        RedissonSession newSession = new RedissonSession(noKeyInfoMap, mock(RMap.class), UUID.randomUUID());
+        newSession.getAttributeKeys();
     }
 
     @Test
