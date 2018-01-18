@@ -29,16 +29,16 @@ public class RedissonSessionDao extends AbstractSessionDAO {
     protected Serializable doCreate(Session session) {
         Serializable sessionId = generateSessionId(session);
         assignSessionId(session, sessionId);
-        RMap<String, Object> sessionInfoMap = this.redisson.getMap(SESSION_INFO_KEY_PREFIX + sessionId);
-        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(SESSION_ATTR_KEY_PREFIX + sessionId);
+        RMap<String, Object> sessionInfoMap = this.redisson.getMap(getSessionInfoKey(sessionId.toString()));
+        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(getSessionAttrKey(sessionId.toString()));
         new RedissonSession(sessionInfoMap, sessionAttrMap, session);
         return sessionId;
     }
 
     @Override
     protected Session doReadSession(Serializable sessionId) {
-        RMap<String, Object> sessionInfoMap = this.redisson.getMap(SESSION_INFO_KEY_PREFIX + sessionId);
-        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(SESSION_ATTR_KEY_PREFIX + sessionId);
+        RMap<String, Object> sessionInfoMap = this.redisson.getMap(getSessionInfoKey(sessionId.toString()));
+        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(getSessionAttrKey(sessionId.toString()));
         if (sessionInfoMap.remainTimeToLive() > 0) {
             return new RedissonSession(sessionInfoMap, sessionAttrMap, sessionId);
         } else {
@@ -57,8 +57,8 @@ public class RedissonSessionDao extends AbstractSessionDAO {
             return;
         }
         Serializable sessionId = session.getId();
-        RMap<String, Object> sessionInfoMap = this.redisson.getMap(SESSION_INFO_KEY_PREFIX + sessionId);
-        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(SESSION_ATTR_KEY_PREFIX + sessionId);
+        RMap<String, Object> sessionInfoMap = this.redisson.getMap(getSessionInfoKey(sessionId.toString()));
+        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(getSessionAttrKey(sessionId.toString()));
         sessionInfoMap.unlink();
         sessionAttrMap.unlink();
     }
@@ -69,7 +69,39 @@ public class RedissonSessionDao extends AbstractSessionDAO {
         return Collections.EMPTY_LIST;
     }
 
+    /**
+     * <p>Get key name by session id for binding a RMap to store basic informations of the session.</p>
+     * <p>
+     *  In redis cluster, key hash tags ensure that the binding RMaps of a session are allocated in the
+     *  same hash slot.
+     *  <a href="https://redis.io/topics/cluster-spec#keys-hash-tags">https://redis.io/topics/cluster-spec#keys-hash-tags</a>
+     * </p>
+     *
+     * @param sessionId the session id
+     * @return key name
+     */
+    protected String getSessionInfoKey(String sessionId) {
+        StringBuilder name = new StringBuilder(SESSION_INFO_KEY_PREFIX);
+        name.append("{").append(sessionId).append("}");
+        return name.toString();
+    }
 
+    /**
+     * <p>Get key name by session id for binding a RMap to store attributes of the session.</p>
+     * <p>
+     *  In redis cluster, key hash tags ensure that the binding RMaps of a session are allocated in the
+     *  same hash slot.
+     *  <a href="https://redis.io/topics/cluster-spec#keys-hash-tags">https://redis.io/topics/cluster-spec#keys-hash-tags</a>
+     * </p>
+     *
+     * @param sessionId the session id
+     * @return key name
+     */
+    protected String getSessionAttrKey(String sessionId) {
+        StringBuilder name = new StringBuilder(SESSION_ATTR_KEY_PREFIX);
+        name.append("{").append(sessionId).append("}");
+        return name.toString();
+    }
 
     public RedissonClient getRedisson() {
         return redisson;
