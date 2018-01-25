@@ -5,6 +5,7 @@ import org.apache.shiro.session.InvalidSessionException;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.*;
+import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ public class RedissonSessionManager extends AbstractNativeSessionManager {
 
     private SessionFactory sessionFactory;
 
-    protected RedissonSessionDao sessionDAO;
+    protected SessionDAO sessionDAO;
 
     public RedissonSessionManager() {
         this.sessionFactory = new SimpleSessionFactory();
@@ -85,11 +86,11 @@ public class RedissonSessionManager extends AbstractNativeSessionManager {
         this.sessionFactory = sessionFactory;
     }
 
-    public RedissonSessionDao getSessionDAO() {
+    public SessionDAO getSessionDAO() {
         return sessionDAO;
     }
 
-    public void setSessionDAO(RedissonSessionDao sessionDAO) {
+    public void setSessionDAO(SessionDAO sessionDAO) {
         this.sessionDAO = sessionDAO;
     }
 }
