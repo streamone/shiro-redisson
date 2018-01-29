@@ -4,13 +4,17 @@ import org.apache.shiro.session.Session;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.eis.AbstractSessionDAO;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
-import org.redisson.api.RMap;
+import org.redisson.RedissonScript;
+import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.Codec;
 import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * <p>A {@link SessionDAO} implementation backed by Redisson Objects.</p>
@@ -20,27 +24,35 @@ import java.util.Collections;
 public class RedissonSessionDao extends AbstractSessionDAO {
 
     public static final String SESSION_INFO_KEY_PREFIX = "session:info:";
-
     public static final String SESSION_ATTR_KEY_PREFIX = "session:attr:";
 
     private RedissonClient redisson;
+    private Codec codec;
 
     @Override
     protected Serializable doCreate(Session session) {
         Serializable sessionId = generateSessionId(session);
         assignSessionId(session, sessionId);
-        RMap<String, Object> sessionInfoMap = this.redisson.getMap(getSessionInfoKey(sessionId.toString()));
-        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(getSessionAttrKey(sessionId.toString()));
-        new RedissonSession(sessionInfoMap, sessionAttrMap, session);
+        String infoKey = getSessionInfoKey(sessionId.toString());
+        String attrKey = getSessionAttrKey(sessionId.toString());
+        new RedissonSession(this.redisson, this.codec, infoKey, attrKey, session);
         return sessionId;
     }
 
     @Override
     protected Session doReadSession(Serializable sessionId) {
-        RMap<String, Object> sessionInfoMap = this.redisson.getMap(getSessionInfoKey(sessionId.toString()));
-        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(getSessionAttrKey(sessionId.toString()));
-        if (sessionInfoMap.remainTimeToLive() > 0) {
-            return new RedissonSession(sessionInfoMap, sessionAttrMap, sessionId);
+        String infoKey = getSessionInfoKey(sessionId.toString());
+        String attrKey = getSessionAttrKey(sessionId.toString());
+        List<Object> keys = new ArrayList<>(1);
+        keys.add(infoKey);
+
+        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        Long remainTimeToLive = script.eval(infoKey, RScript.Mode.READ_ONLY, this.codec,
+                RedissonSessionScript.READ_SCRIPT,
+                RScript.ReturnType.INTEGER, keys);
+
+        if (remainTimeToLive > 0) {
+            return new RedissonSession(this.redisson, this.codec, infoKey, attrKey, sessionId);
         } else {
             return null;
         }
@@ -57,10 +69,16 @@ public class RedissonSessionDao extends AbstractSessionDAO {
             return;
         }
         Serializable sessionId = session.getId();
-        RMap<String, Object> sessionInfoMap = this.redisson.getMap(getSessionInfoKey(sessionId.toString()));
-        RMap<Object, Object> sessionAttrMap = this.redisson.getMap(getSessionAttrKey(sessionId.toString()));
-        sessionInfoMap.unlink();
-        sessionAttrMap.unlink();
+        String infoKey = getSessionInfoKey(sessionId.toString());
+        String attrKey = getSessionAttrKey(sessionId.toString());
+        List<Object> keys = new ArrayList<>(2);
+        keys.add(infoKey);
+        keys.add(attrKey);
+
+        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        script.eval(infoKey, RScript.Mode.READ_WRITE, this.codec,
+            RedissonSessionScript.DELETE_SCRIPT,
+            RScript.ReturnType.VALUE, keys);
     }
 
     @Override
@@ -109,5 +127,13 @@ public class RedissonSessionDao extends AbstractSessionDAO {
 
     public void setRedisson(RedissonClient redisson) {
         this.redisson = redisson;
+    }
+
+    public Codec getCodec() {
+        return codec;
+    }
+
+    public void setCodec(Codec codec) {
+        this.codec = codec;
     }
 }

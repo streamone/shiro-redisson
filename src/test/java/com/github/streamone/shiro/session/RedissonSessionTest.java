@@ -6,7 +6,13 @@ import org.apache.shiro.session.mgt.DefaultSessionKey;
 import org.apache.shiro.session.mgt.SimpleSession;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.redisson.Redisson;
+import org.redisson.RedissonScript;
 import org.redisson.api.RMap;
+import org.redisson.api.RScript;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisException;
+import org.redisson.client.codec.Codec;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -17,8 +23,10 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.streamone.shiro.session.RedissonSessionScript.RETURN_CODE_EXPIRED;
 import static org.apache.shiro.session.mgt.AbstractSessionManager.DEFAULT_GLOBAL_SESSION_TIMEOUT;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,34 +47,41 @@ public class RedissonSessionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateSessionByIllegalArguments() {
-        new RedissonSession(null, null, (Serializable) null);
+        new RedissonSession(null,null, null, null, (Serializable) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateSessionByIllegalArguments2() {
-        new RedissonSession(null, null, (Session) null);
+        new RedissonSession(null,null, null, null, (Session) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateSessionByIllegalArguments3() {
         Session session = new SimpleSession();
-        new RedissonSession(mock(RMap.class), mock(RMap.class), session);
+        new RedissonSession(mock(RedissonClient.class), null, "", "", session);
     }
 
     @Test(expected = ExpiredSessionException.class)
     public void testCreateSessionByInvalidState() {
-        RMap<String, Object> notExistInfoMap = mock(RMap.class);
-        when(notExistInfoMap.isExists()).thenReturn(false);
-        RedissonSession newSession = new RedissonSession(notExistInfoMap, mock(RMap.class), UUID.randomUUID());
+        RedissonScript mockedScript = mock(RedissonScript.class);
+        when(mockedScript.eval(anyString(), any(RScript.Mode.class), any(Codec.class), anyString(),
+            any(RScript.ReturnType.class), anyList(), any())).thenThrow(new RedisException("-1"));
+        RedissonClient mockedRedisson = mock(RedissonClient.class);
+        when(mockedRedisson.getScript()).thenReturn(mockedScript);
+
+        RedissonSession newSession = new RedissonSession(mockedRedisson, null, "", "", UUID.randomUUID());
         newSession.getAttributeKeys();
     }
 
     @Test(expected = StoppedSessionException.class)
     public void testCreateSessionByInvalidState2() {
-        RMap<String, Object> noKeyInfoMap = mock(RMap.class);
-        when(noKeyInfoMap.isExists()).thenReturn(true);
-        when(noKeyInfoMap.containsKey(RedissonSession.INFO_STOP_KEY)).thenReturn(true);
-        RedissonSession newSession = new RedissonSession(noKeyInfoMap, mock(RMap.class), UUID.randomUUID());
+        RedissonScript mockedScript = mock(RedissonScript.class);
+        when(mockedScript.eval(anyString(), any(RScript.Mode.class), any(Codec.class), anyString(),
+                any(RScript.ReturnType.class), anyList(), any())).thenThrow(new RedisException("-2"));
+        RedissonClient mockedRedisson = mock(RedissonClient.class);
+        when(mockedRedisson.getScript()).thenReturn(mockedScript);
+
+        RedissonSession newSession = new RedissonSession(mockedRedisson, null, "", "", UUID.randomUUID());
         newSession.getAttributeKeys();
     }
 
