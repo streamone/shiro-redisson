@@ -59,7 +59,7 @@ public class RedissonSessionManagerTest {
         assertNotNull(session.getStartTimestamp());
 
         Session newSession = this.sessionManager.start(new DefaultSessionContext());
-        assertNull(newSession.getHost());
+        assertEquals("", newSession.getHost());
         assertNotNull(newSession);
         assertEquals(DEFAULT_GLOBAL_SESSION_TIMEOUT, newSession.getTimeout());
         assertNotNull(newSession.getStartTimestamp());
