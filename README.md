@@ -4,8 +4,15 @@
 [![Coverage Status](https://coveralls.io/repos/github/streamone/shiro-redisson/badge.svg?branch=master)](https://coveralls.io/github/streamone/shiro-redisson?branch=master)
 [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/streamone/shiro-redisson/blob/master/LICENSE)
 
-### A redis based implementation of Shiro Cache, using [redisson](https://github.com/redisson/redisson) for basic capabilities.
+### Redis based implementation of Apache Shiro's Cache and Session, using [redisson](https://github.com/redisson/redisson) as rich redis client.
 
-**NOTICE**: It hasn't been prepared for production environment.
+compatible with:
+* shiro 1.3.x
+* redisson 2.x
+* redis 4.x
 
+### [Documentation](https://github.com/streamone/shiro-redisson/wiki)
 
+### Features
+* Shiro Cache implementation
+* Shiro Session implementation
