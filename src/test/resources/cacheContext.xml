@@ -9,9 +9,10 @@
 
     <import resource="appContext.xml"/>
 
-    <bean id="cacheManager" class="com.github.streamone.shiro.cache.RedissonShiroCacheManager">
+    <bean id="cacheManager" class="com.github.streamone.shiro.cache.RedissonShiroCacheManager"
+        init-method="init">
         <property name="redisson" ref="redisson"/>
-        <property name="configLocation" value="classpath:/cache-config.json"/>
+        <property name="configLocation" value="classpath:cache-config.json"/>
     </bean>
 
 </beans>
