@@ -8,7 +8,6 @@ import org.redisson.RedissonScript;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
-import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -65,7 +64,7 @@ public class RedissonSessionDao extends AbstractSessionDAO {
 
     @Override
     public void delete(Session session) {
-        if (session == null || StringUtils.isEmpty(session.getId())) {
+        if (session == null || session.getId() == null || "".equals(session.getId())) {
             return;
         }
         Serializable sessionId = session.getId();

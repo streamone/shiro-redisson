@@ -3,16 +3,13 @@ package com.github.streamone.shiro.cache;
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.cache.CacheManager;
+import org.apache.shiro.io.ResourceUtils;
+import org.apache.shiro.util.Initializable;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
 import org.redisson.spring.cache.CacheConfig;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
 import java.util.Map;
@@ -25,9 +22,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author streamone
  */
-public class RedissonShiroCacheManager implements CacheManager, ResourceLoaderAware, InitializingBean {
-
-    private ResourceLoader resourceLoader;
+public class RedissonShiroCacheManager implements CacheManager, Initializable {
 
     private boolean allowNullValues = true;
 
@@ -127,28 +122,22 @@ public class RedissonShiroCacheManager implements CacheManager, ResourceLoaderAw
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void init() {
         if (this.configLocation == null) {
             return;
         }
 
-        Resource resource = resourceLoader.getResource(this.configLocation);
         try {
-            this.configMap = (Map<String, CacheConfig>) CacheConfig.fromJSON(resource.getInputStream());
+            this.configMap = (Map<String, CacheConfig>) CacheConfig.fromJSON(ResourceUtils.getInputStreamForPath(this.configLocation));
         } catch (IOException e) {
             // try to read yaml
             try {
-                this.configMap = (Map<String, CacheConfig>) CacheConfig.fromYAML(resource.getInputStream());
+                this.configMap = (Map<String, CacheConfig>) CacheConfig.fromYAML(ResourceUtils.getInputStreamForPath(this.configLocation));
             } catch (IOException e1) {
-                throw new BeanDefinitionStoreException(
+                throw new IllegalArgumentException(
                         "Could not parse cache configuration at [" + configLocation + "]", e1);
             }
         }
-    }
-
-    @Override
-    public void setResourceLoader(ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
     }
 
     public void setConfig(Map<String, ? extends CacheConfig> config) {

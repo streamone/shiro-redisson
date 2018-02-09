@@ -1,22 +1,19 @@
 package com.github.streamone.shiro.cache;
 
 import org.apache.shiro.cache.Cache;
+import org.apache.shiro.io.ResourceUtils;
 import org.junit.Test;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
 import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.spring.cache.CacheConfig;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.core.io.DefaultResourceLoader;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * <p>RedissonShiroCacheManager test case.</p>
@@ -25,21 +22,21 @@ import static org.junit.Assert.assertSame;
  */
 public class RedissonShiroCacheManagerTest {
 
-    @Test(expected = BeanDefinitionStoreException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testConstructors() {
         RedissonClient client = Redisson.create();
         InputStream in = null;
         File invalidConfigFile = null;
         try {
-            in = this.getClass().getResourceAsStream("/cache-config.json");
+            String configLocation = "classpath:cache-config.json";
+            in = ResourceUtils.getInputStreamForPath(configLocation);
             Map<String, ? extends CacheConfig> configMap = CacheConfig.fromJSON(in);
             Codec codec = new JsonJacksonCodec();
-            String configLocation = "classpath:/cache-config.json";
 
             RedissonShiroCacheManager cacheManager1 = new RedissonShiroCacheManager(client);
             cacheManager1.setConfig(configMap);
             cacheManager1.setCodec(codec);
-            cacheManager1.afterPropertiesSet();
+            cacheManager1.init();
             assertEquals(client, cacheManager1.getRedisson());
             assertEquals(codec, cacheManager1.getCodec());
             Cache<String, String> cache1 =  cacheManager1.getCache("testManagerCache1");
@@ -65,12 +62,12 @@ public class RedissonShiroCacheManagerTest {
             assertEquals(cache3, retrievedCache3);
             cache3.clear();
 
-            invalidConfigFile = File.createTempFile("cac", null);
+            String path = this.getClass().getClassLoader().getResource("cache-config.json").getFile();
+            invalidConfigFile = File.createTempFile("cac", null, new File(path).getParentFile());
             RedissonShiroCacheManager cacheManager4 = new RedissonShiroCacheManager(client,
-                "file:" + invalidConfigFile.getCanonicalPath());
-            cacheManager4.setResourceLoader(new DefaultResourceLoader());
-            cacheManager4.afterPropertiesSet();
-        } catch (BeanDefinitionStoreException e) {
+                "classpath:" + invalidConfigFile.getName());
+            cacheManager4.init();
+        } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,7 +85,7 @@ public class RedissonShiroCacheManagerTest {
                 }
             }
 
-            if (invalidConfigFile != null) {
+            if (invalidConfigFile != null && invalidConfigFile.exists()) {
                 invalidConfigFile.delete();
             }
         }
