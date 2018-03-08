@@ -16,11 +16,11 @@ compatible with:
 ### Features
 * Shiro Cache implementation
   * support cache config according to Spring Cache specification
-  * support several serialization solutions: JDK Serialization, JSON, Avro, Smile, MsgPack, FST and so on
+  * support several serialization solutions: JDK Serialization, JSON, Smile, MsgPack, FST and so on
   * support common redis servers mode,  including single server, master-salve replication, sentinel, cluster
 
 * Shiro Session implementation
   * serialize attributes of session individually as minimum unit
   * package redis commands in lua script for high performance (reduce round-trip time)  and supporting transaction
-  * support several serialization solutions: JDK Serialization, JSON, Avro, Smile, MsgPack, FST and so on
+  * support several serialization solutions: JDK Serialization, JSON, Smile, MsgPack, FST and so on
   * support common redis servers mode,  including single server, master-salve replication, sentinel, cluster
