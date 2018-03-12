@@ -1,7 +1,7 @@
 plugins {
     id 'eclipse'
     id 'idea'
-    id 'java'
+    id 'java-library'
     id 'maven'
     id 'maven-publish'
     id 'signing'
@@ -16,29 +16,25 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.github.streamone'
-version = '1.0.0.SNAPSHOT'
+version = '1.0.0.RELEASE'
 
 repositories {
     mavenCentral()
 }
 
-configurations {
-	all*.exclude group: 'apache', module: 'commons-logging'
-	all*.exclude group: 'commons-logging', module: 'commons-logging'
-}
-
 dependencies {
-  compile 'org.slf4j:slf4j-api:1.7.25',
-    'javax.servlet:servlet-api:2.5',
-    'org.apache.shiro:shiro-core:1.3.2',
-    'org.apache.shiro:shiro-web:1.3.2',
-    'org.redisson:redisson:2.11.0'
+  api 'org.redisson:redisson:2.11.0',
+  'org.apache.shiro:shiro-core:1.3.2',
+  'org.apache.shiro:shiro-web:1.3.2'
 
-  testCompile 'junit:junit:4.12',
+  implementation 'org.slf4j:slf4j-api:1.7.25',
+    'javax.servlet:servlet-api:2.5'
+
+  testImplementation 'junit:junit:4.12',
     'org.springframework:spring-test:3.2.18.RELEASE',
     'org.mockito:mockito-core:2.13.0'
 
-  testRuntime 'org.slf4j:jcl-over-slf4j:1.7.25',
+  testRuntimeOnly 'org.slf4j:jcl-over-slf4j:1.7.25',
     'ch.qos.logback:logback-core:1.1.11',
     'ch.qos.logback:logback-classic:1.1.11',
     'ch.qos.logback:logback-access:1.1.11',
@@ -96,6 +92,50 @@ publishing {
             from components.java
             artifact sourceJar
             artifact javadocJar
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
+            }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: publish_username, password: publish_password)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: publish_username, password: publish_password)
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description 'A redis based implementation of Shiro Cache, using redisson for basic capabilities.'
+                url 'https://github.com/streamone/shiro-redisson'
+                scm {
+                    url 'https://github.com/streamone/shiro-redisson'
+                    connection 'scm:git:https://github.com/streamone/shiro-redisson.git'
+                    developerConnection 'scm:git:https://github.com/streamone/shiro-redisson.git'
+                }
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'https://github.com/streamone/shiro-redisson/blob/master/LICENSE'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'streamone'
+                        name 'Zhongxu You'
+                        email 'streamone@163.com'
+                    }
+                }
+            }
         }
     }
 }
