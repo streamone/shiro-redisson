@@ -13,6 +13,16 @@ compatible with:
 
 ### [Documentation](https://github.com/streamone/shiro-redisson/wiki)
 
+### Download
+Maven dependency:
+```xml
+<dependency>
+    <groupId>com.github.streamone</groupId>
+    <artifactId>shiro-redisson</artifactId>
+    <version>1.0.0.RELEASE</version>
+</dependency>
+```
+
 ### Features
 * Shiro Cache implementation
   * support cache config according to Spring Cache specification
