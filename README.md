@@ -8,7 +8,7 @@
 
 compatible with:
 * shiro 1.3.x
-* redisson 2.x
+* redisson 2.x / 3.x
 * redis 4.x
 
 ### [Documentation](https://github.com/streamone/shiro-redisson/wiki)
@@ -26,11 +26,11 @@ Maven dependency:
 ### Features
 * Shiro Cache implementation
   * support cache config according to Spring Cache specification
-  * support several serialization solutions: JDK Serialization, JSON, Smile, MsgPack, FST and so on
-  * support common redis servers mode,  including single server, master-salve replication, sentinel, cluster
 
 * Shiro Session implementation
   * serialize attributes of session individually as minimum unit
   * package redis commands in lua script for high performance (reduce round-trip time)  and supporting transaction
+
+* Others
   * support several serialization solutions: JDK Serialization, JSON, Smile, MsgPack, FST and so on
-  * support common redis servers mode,  including single server, master-salve replication, sentinel, cluster
+  * support common redis servers mode,  including single server, master-salve replication, sentinel, cluster  
