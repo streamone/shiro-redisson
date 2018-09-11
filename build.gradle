@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-  api 'org.redisson:redisson:2.12.1',
+  api 'org.redisson:redisson:2.13.0',
   'org.apache.shiro:shiro-core:1.3.2',
   'org.apache.shiro:shiro-web:1.3.2'
 
