@@ -47,10 +47,6 @@ tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.8'
-}
-
 javadoc {
     options.encoding = "UTF-8"
     options.locale = "en_US"
