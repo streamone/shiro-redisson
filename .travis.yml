@@ -3,10 +3,12 @@ language: java
 services:
   - redis-server
 
-matrix:
-  include:
-    - jdk: oraclejdk8
-      sudo: required
+jdk:
+  - oraclejdk8
+  - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
