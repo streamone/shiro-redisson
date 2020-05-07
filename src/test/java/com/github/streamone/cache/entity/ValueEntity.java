@@ -1,11 +1,13 @@
 package com.github.streamone.cache.entity;
 
+import java.io.Serializable;
+
 /**
  * <p>A value entity class for cache testing.</p>
  *
  * @author streamone
  */
-public class ValueEntity {
+public class ValueEntity implements Serializable {
 
     private String value;
 

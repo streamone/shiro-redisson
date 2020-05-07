@@ -64,10 +64,10 @@ public class RedissonSessionTest {
     @Test(expected = ExpiredSessionException.class)
     public void testCreateSessionByInvalidState() {
         RedissonScript mockedScript = mock(RedissonScript.class);
-        when(mockedScript.eval(anyString(), any(RScript.Mode.class), any(Codec.class), anyString(),
+        when(mockedScript.eval(anyString(), any(RScript.Mode.class), anyString(),
             any(RScript.ReturnType.class), anyList(), any())).thenThrow(new RedisException("-1"));
         RedissonClient mockedRedisson = mock(RedissonClient.class);
-        when(mockedRedisson.getScript()).thenReturn(mockedScript);
+        when(mockedRedisson.getScript(any(Codec.class))).thenReturn(mockedScript);
 
         RedissonSession newSession = new RedissonSession(mockedRedisson, null, "", "", UUID.randomUUID());
         newSession.getAttributeKeys();
@@ -76,10 +76,10 @@ public class RedissonSessionTest {
     @Test(expected = StoppedSessionException.class)
     public void testCreateSessionByInvalidState2() {
         RedissonScript mockedScript = mock(RedissonScript.class);
-        when(mockedScript.eval(anyString(), any(RScript.Mode.class), any(Codec.class), anyString(),
+        when(mockedScript.eval(anyString(), any(RScript.Mode.class), anyString(),
                 any(RScript.ReturnType.class), anyList(), any())).thenThrow(new RedisException("-2"));
         RedissonClient mockedRedisson = mock(RedissonClient.class);
-        when(mockedRedisson.getScript()).thenReturn(mockedScript);
+        when(mockedRedisson.getScript(any(Codec.class))).thenReturn(mockedScript);
 
         RedissonSession newSession = new RedissonSession(mockedRedisson, null, "", "", UUID.randomUUID());
         newSession.getAttributeKeys();

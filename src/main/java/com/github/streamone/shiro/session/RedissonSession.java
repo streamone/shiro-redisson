@@ -87,8 +87,8 @@ public class RedissonSession implements Session {
         List<Object> keys = new ArrayList<>(1);
         keys.add(this.infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
-        script.eval(this.infoKey, RScript.Mode.READ_WRITE, this.infoCodec, INIT_SCRIPT,
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
+        script.eval(this.infoKey, RScript.Mode.READ_WRITE, INIT_SCRIPT,
             RScript.ReturnType.VALUE, keys, session.getId(), timeout, startTimeStamp,
             host);
     }
@@ -103,11 +103,11 @@ public class RedissonSession implements Session {
         List<Object> keys = new ArrayList<>(1);
         keys.add(this.infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         Date res = null;
         try {
             res = script.eval(this.infoKey, RScript.Mode.READ_ONLY,
-                this.infoCodec, GET_START_SCRIPT,
+                GET_START_SCRIPT,
                 RScript.ReturnType.MAPVALUE, keys);
         } catch (RedisException e) {
             convertException(e);
@@ -125,11 +125,11 @@ public class RedissonSession implements Session {
         List<Object> keys = new ArrayList<>(1);
         keys.add(this.infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         Date res = null;
         try {
             res = script.eval(this.infoKey, RScript.Mode.READ_ONLY,
-                this.infoCodec, GET_LAST_SCRIPT,
+                GET_LAST_SCRIPT,
                 RScript.ReturnType.MAPVALUE, keys);
         } catch (RedisException e) {
             convertException(e);
@@ -147,11 +147,11 @@ public class RedissonSession implements Session {
         List<Object> keys = new ArrayList<>(1);
         keys.add(this.infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         Long res = null;
         try {
             res = script.eval(this.infoKey, RScript.Mode.READ_ONLY,
-                this.infoCodec, GET_TIMEOUT_SCRIPT,
+                GET_TIMEOUT_SCRIPT,
                 RScript.ReturnType.MAPVALUE, keys);
         } catch (RedisException e) {
             convertException(e);
@@ -170,10 +170,10 @@ public class RedissonSession implements Session {
         keys.add(this.infoKey);
         keys.add(this.attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         try {
             script.eval(this.infoKey, RScript.Mode.READ_WRITE,
-                this.infoCodec, SET_TIMEOUT_SCRIPT,
+                SET_TIMEOUT_SCRIPT,
                 RScript.ReturnType.VALUE, keys, maxIdleTimeInMillis);
         } catch (RedisException e) {
             convertException(e);
@@ -185,11 +185,11 @@ public class RedissonSession implements Session {
         List<Object> keys = new ArrayList<>(1);
         keys.add(this.infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         String res = null;
         try {
             res = script.eval(this.infoKey, RScript.Mode.READ_ONLY,
-                this.infoCodec, GET_HOST_SCRIPT,
+                GET_HOST_SCRIPT,
                 RScript.ReturnType.MAPVALUE, keys);
         } catch (RedisException e) {
             convertException(e);
@@ -208,9 +208,9 @@ public class RedissonSession implements Session {
         keys.add(this.infoKey);
         keys.add(this.attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         try {
-            script.eval(this.infoKey, RScript.Mode.READ_WRITE, this.infoCodec,
+            script.eval(this.infoKey, RScript.Mode.READ_WRITE,
                 TOUCH_SCRIPT, RScript.ReturnType.VALUE, keys, new Date());
         } catch (RedisException e) {
             convertException(e);
@@ -222,9 +222,9 @@ public class RedissonSession implements Session {
         List<Object> keys = new ArrayList<>(1);
         keys.add(this.infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.infoCodec);
         try {
-            script.eval(this.infoKey, RScript.Mode.READ_WRITE, this.infoCodec,
+            script.eval(this.infoKey, RScript.Mode.READ_WRITE,
                 STOP_SCRIPT, RScript.ReturnType.VALUE, keys, new Date());
         } catch (RedisException e) {
             convertException(e);
@@ -237,10 +237,10 @@ public class RedissonSession implements Session {
         keys.add(this.infoKey);
         keys.add(this.attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.codec);
         Collection<Object> res = null;
         try {
-            res = script.eval(this.infoKey, RScript.Mode.READ_ONLY, this.codec,
+            res = script.eval(this.infoKey, RScript.Mode.READ_ONLY,
                 GET_ATTRKEYS_SCRIPT, RScript.ReturnType.MAPVALUELIST, keys);
         } catch (RedisException e) {
             convertException(e);
@@ -259,10 +259,10 @@ public class RedissonSession implements Session {
         keys.add(this.infoKey);
         keys.add(this.attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.codec);
         Object res = null;
         try {
-            res = script.eval(this.infoKey, RScript.Mode.READ_ONLY, this.codec,
+            res = script.eval(this.infoKey, RScript.Mode.READ_ONLY,
                 GET_ATTR_SCRIPT, RScript.ReturnType.MAPVALUE, keys, key);
         } catch (RedisException e) {
             convertException(e);
@@ -277,9 +277,9 @@ public class RedissonSession implements Session {
         keys.add(this.infoKey);
         keys.add(this.attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.codec);
         try {
-            script.eval(this.infoKey, RScript.Mode.READ_WRITE, this.codec,
+            script.eval(this.infoKey, RScript.Mode.READ_WRITE,
                 SET_ATTR_SCRIPT, RScript.ReturnType.VALUE, keys, key, value);
         } catch (RedisException e) {
             convertException(e);
@@ -292,10 +292,10 @@ public class RedissonSession implements Session {
         keys.add(this.infoKey);
         keys.add(this.attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.codec);
         Object res = null;
         try {
-            res = script.eval(this.infoKey, RScript.Mode.READ_WRITE, this.codec,
+            res = script.eval(this.infoKey, RScript.Mode.READ_WRITE,
                 REMOVE_ATTR_SCRIPT, RScript.ReturnType.MAPVALUE, keys, key);
         } catch (RedisException e) {
             convertException(e);
