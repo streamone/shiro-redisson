@@ -9,6 +9,7 @@ import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
+import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.spring.cache.CacheConfig;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class RedissonShiroCacheManager implements CacheManager, Initializable {
 
     private boolean allowNullValues = true;
 
-    private Codec codec;
+    private Codec codec = new JsonJacksonCodec();
 
     private RedissonClient redisson;
 
@@ -48,7 +49,9 @@ public class RedissonShiroCacheManager implements CacheManager, Initializable {
     public RedissonShiroCacheManager(RedissonClient redisson, Map<String, ? extends CacheConfig> config, Codec codec) {
         this.redisson = redisson;
         this.configMap = (Map<String, CacheConfig>) config;
-        this.codec = codec;
+        if (codec != null) {
+            this.codec = codec;
+        }
     }
 
     public RedissonShiroCacheManager(RedissonClient redisson, String configLocation) {
@@ -58,7 +61,9 @@ public class RedissonShiroCacheManager implements CacheManager, Initializable {
     public RedissonShiroCacheManager(RedissonClient redisson, String configLocation, Codec codec) {
         this.redisson = redisson;
         this.configLocation = configLocation;
-        this.codec = codec;
+        if (codec != null) {
+            this.codec = codec;
+        }
     }
 
     protected CacheConfig createDefaultConfig() {
