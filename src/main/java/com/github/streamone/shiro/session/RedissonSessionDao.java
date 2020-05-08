@@ -8,6 +8,7 @@ import org.redisson.RedissonScript;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.Codec;
+import org.redisson.codec.JsonJacksonCodec;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class RedissonSessionDao extends AbstractSessionDAO {
     public static final String SESSION_ATTR_KEY_PREFIX = "session:attr:";
 
     private RedissonClient redisson;
-    private Codec codec;
+    private Codec codec = new JsonJacksonCodec();
 
     @Override
     protected Serializable doCreate(Session session) {

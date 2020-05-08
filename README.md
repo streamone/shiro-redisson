@@ -7,9 +7,10 @@
 ### Redis based implementations of Apache Shiro's Cache and Session, using [redisson](https://github.com/redisson/redisson) as rich redis client.
 
 compatible with:
-* shiro 1.3.x
-* redisson 2.x / 3.x
-* redis 4.x
+* JDK 1.8 - 14
+* shiro 1.5.x
+* redisson 3.9.0+
+* redis 3+
 
 ### [Documentation](https://github.com/streamone/shiro-redisson/wiki)
 
@@ -19,7 +20,7 @@ Maven dependency:
 <dependency>
     <groupId>com.github.streamone</groupId>
     <artifactId>shiro-redisson</artifactId>
-    <version>1.0.0.RELEASE</version>
+    <version>1.5.0.RELEASE</version>
 </dependency>
 ```
 
