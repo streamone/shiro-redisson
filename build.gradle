@@ -6,33 +6,35 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.8.2'
+    id 'com.github.kt3k.coveralls' version '2.8.4'
 }
 
 def publish_username = project.hasProperty("ossrhUsername") ? project.ossrhUsername : ''
 def publish_password = project.hasProperty("ossrhPassword") ? project.ossrhPassword : ''
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
 
 group = 'com.github.streamone'
-version = '1.0.0.RELEASE'
+version = '1.5.0.RELEASE'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-  api 'org.redisson:redisson:2.11.2',
-  'org.apache.shiro:shiro-core:1.3.2',
-  'org.apache.shiro:shiro-web:1.3.2'
+  api 'org.redisson:redisson:3.12.5',
+    'org.apache.shiro:shiro-core:1.5.3',
+    'org.apache.shiro:shiro-web:1.5.3'
 
   implementation 'org.slf4j:slf4j-api:1.7.25',
-    'javax.servlet:servlet-api:2.5'
+    'javax.annotation:javax.annotation-api:1.3.2'
+
+  compileOnly 'javax.servlet:servlet-api:2.5'
 
   testImplementation 'junit:junit:4.12',
     'org.springframework:spring-test:3.2.18.RELEASE',
-    'org.mockito:mockito-core:2.13.0'
+    'org.mockito:mockito-core:2.13.0',
+    'javax.servlet:servlet-api:2.5'
 
   testRuntimeOnly 'org.slf4j:jcl-over-slf4j:1.7.25',
     'ch.qos.logback:logback-core:1.1.11',
@@ -45,10 +47,6 @@ dependencies {
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.6'
 }
 
 javadoc {
@@ -71,10 +69,6 @@ artifacts {
     archives sourceJar
 }
 
-signing {
-    sign configurations.archives
-}
-
 tasks.withType(Sign) {
     onlyIf { project.hasProperty("publish_sign") }
 }
@@ -92,50 +86,47 @@ publishing {
             from components.java
             artifact sourceJar
             artifact javadocJar
-        }
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment {
-                MavenDeployment deployment -> signing.signPom(deployment)
-            }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: publish_username, password: publish_password)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: publish_username, password: publish_password)
-            }
-
-            pom.project {
-                name project.name
-                packaging 'jar'
-                description 'A redis based implementation of Shiro Cache, using redisson for basic capabilities.'
-                url 'https://github.com/streamone/shiro-redisson'
+            pom {
+                name = project.name
+                packaging = 'jar'
+                description = 'A redis based implementation of Shiro Cache, using redisson for basic capabilities.'
+                url = 'https://github.com/streamone/shiro-redisson'
                 scm {
-                    url 'https://github.com/streamone/shiro-redisson'
-                    connection 'scm:git:https://github.com/streamone/shiro-redisson.git'
-                    developerConnection 'scm:git:https://github.com/streamone/shiro-redisson.git'
+                    url = 'https://github.com/streamone/shiro-redisson'
+                    connection = 'scm:git:https://github.com/streamone/shiro-redisson.git'
+                    developerConnection = 'scm:git:https://github.com/streamone/shiro-redisson.git'
                 }
                 licenses {
                     license {
-                        name 'MIT License'
-                        url 'https://github.com/streamone/shiro-redisson/blob/master/LICENSE'
-                        distribution 'repo'
+                        name = 'MIT License'
+                        url = 'https://github.com/streamone/shiro-redisson/blob/master/LICENSE'
+                        distribution = 'repo'
                     }
                 }
                 developers {
                     developer {
-                        id 'streamone'
-                        name 'Zhongxu You'
-                        email 'streamone@163.com'
+                        id = 'streamone'
+                        name = 'Zhongxu You'
+                        email = 'streamone@163.com'
                     }
                 }
             }
         }
     }
+
+    repositories {
+        maven {
+            def releaseRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releaseRepoUrl
+            credentials {
+                username publish_username
+                password publish_password
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
 }

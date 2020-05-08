@@ -45,8 +45,8 @@ public class RedissonSessionDao extends AbstractSessionDAO {
         List<Object> keys = new ArrayList<>(1);
         keys.add(infoKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
-        Long remainTimeToLive = script.eval(infoKey, RScript.Mode.READ_ONLY, this.codec,
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.codec);
+        Long remainTimeToLive = script.eval(infoKey, RScript.Mode.READ_ONLY,
                 RedissonSessionScript.READ_SCRIPT,
                 RScript.ReturnType.INTEGER, keys);
 
@@ -74,8 +74,8 @@ public class RedissonSessionDao extends AbstractSessionDAO {
         keys.add(infoKey);
         keys.add(attrKey);
 
-        RedissonScript script = (RedissonScript) this.redisson.getScript();
-        script.eval(infoKey, RScript.Mode.READ_WRITE, this.codec,
+        RedissonScript script = (RedissonScript) this.redisson.getScript(this.codec);
+        script.eval(infoKey, RScript.Mode.READ_WRITE,
             RedissonSessionScript.DELETE_SCRIPT,
             RScript.ReturnType.VALUE, keys);
     }
