@@ -6,14 +6,13 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.8.2'
+    id 'com.github.kt3k.coveralls' version '2.8.4'
 }
 
 def publish_username = project.hasProperty("ossrhUsername") ? project.ossrhUsername : ''
 def publish_password = project.hasProperty("ossrhPassword") ? project.ossrhPassword : ''
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
 
 group = 'com.github.streamone'
 version = '1.5.0.RELEASE'
@@ -23,7 +22,7 @@ repositories {
 }
 
 dependencies {
-  api 'org.redisson:redisson:2.15.2',
+  api 'org.redisson:redisson:3.12.5',
   'org.apache.shiro:shiro-core:1.5.3',
   'org.apache.shiro:shiro-web:1.5.3'
 
