@@ -1,5 +1,7 @@
 # shiro-redisson
 
+![Java CI with Gradle](https://github.com/streamone/shiro-redisson/workflows/Java%20CI%20with%20Gradle/badge.svg)
+
 [![Travis](https://img.shields.io/travis/streamone/shiro-redisson.svg)](https://travis-ci.org/streamone/shiro-redisson)
 [![Coverage Status](https://coveralls.io/repos/github/streamone/shiro-redisson/badge.svg?branch=master)](https://coveralls.io/github/streamone/shiro-redisson?branch=master)
 [![license](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/streamone/shiro-redisson/blob/master/LICENSE)
